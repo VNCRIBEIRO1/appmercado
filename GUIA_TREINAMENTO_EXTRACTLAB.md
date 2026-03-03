@@ -1,171 +1,301 @@
 # 📘 Guia de Treinamento - ExtractLab para Cupons Fiscais
 
-## Visão Geral
-
-A ExtractLab usa **modelos treinados** para extrair dados de documentos. Antes de o OCR funcionar no app, você precisa:
-
-1. ✅ Criar uma conta na ExtractLab
-2. ✅ Gerar um token de API
-3. 🔲 Criar um modelo de extração
-4. 🔲 Definir os campos de extração
-5. 🔲 Treinar o modelo com documentos de exemplo
+> **IMPORTANTE**: O treinamento do modelo SÓ pode ser feito pela interface web do ExtractLab.
+> A API serve apenas para EXTRAIR dados de documentos usando um modelo JÁ treinado.
+> Não existe endpoint de API para criar ou treinar modelos.
 
 ---
 
-## Passo 1: Criar o Modelo
+## 📋 Pré-requisitos
 
-1. Acesse: [https://extractlab.com.br/Model/Create](https://extractlab.com.br/Model/Create)
-2. **Nome do Modelo**: `Cupom Mercado` (use este nome exato ou anote o que escolher)
-3. **Descrição**: `Extração de cupons fiscais de supermercado`
-4. Clique em **Criar**
+Antes de começar, confirme que você tem:
 
-> ⚠️ **IMPORTANTE**: O nome do modelo deve ser EXATAMENTE igual ao configurado no app (em Configurações). Se usar outro nome, atualize no app também.
+- [x] Conta criada no ExtractLab → [Criar conta grátis](https://extractlab.com.br/Auth/Register)
+- [x] Token de API gerado → [Configurações → Tokens](https://extractlab.com.br/Dashboard/Settings)
+- [x] PDFs de treinamento gerados (veja "Gerar Documentos" abaixo)
 
----
-
-## Passo 2: Definir os Campos de Extração
-
-Ao criar o modelo, defina estes campos (copie os nomes exatamente):
-
-### Campos Obrigatórios
-
-| Nome do Campo | Tipo | O que marcar no documento |
-|---|---|---|
-| `estabelecimento` | Texto | Nome/razão social do mercado (geralmente no topo do cupom) |
-| `data_emissao` | Data | Data e hora do cupom (formato DD/MM/AAAA HH:MM) |
-| `total_nota` | Número | Valor total da compra (geralmente no final, "TOTAL R$") |
-| `itens` | Texto Longo | **BLOCO INTEIRO** com todos os itens, quantidades e valores |
-
-### Campos Opcionais (melhoram a precisão)
-
-| Nome do Campo | Tipo | O que marcar |
-|---|---|---|
-| `cnpj` | Texto | CNPJ do estabelecimento |
-| `forma_pagamento` | Texto | Forma de pagamento (Crédito, Débito, Dinheiro, PIX) |
+### Plano Gratuito (Starter)
+- ✅ 100 documentos/dia para extração
+- ✅ 1 modelo personalizado
+- ✅ Suporte comunidade
 
 ---
 
-## Passo 3: Preparar Documentos de Treinamento
+## 🚀 Passo a Passo Completo
 
-### Quantos documentos?
-- **Mínimo**: 5 documentos
-- **Recomendado**: 10-20 documentos
-- **Ideal**: 20+ para máxima precisão
+### ETAPA 1: Gerar Documentos de Treinamento
 
-### Tipos de documentos aceitos
-- 📸 Fotos (JPG, PNG) - tiradas com celular
-- 📄 PDFs - cupons digitais (SAT, NFC-e)
+Execute no terminal (dentro da pasta do projeto):
 
-### Dicas para melhores resultados
+```bash
+cd treinamento
+node gerar-pdfs-treinamento.js
+```
 
-✅ **FAÇA:**
-- Use cupons de **mercados diferentes** (Pão de Açúcar, Carrefour, Assaí, etc.)
-- Inclua cupons com **quantidades variadas** de itens (5, 15, 30+ itens)
-- Misture **fotos de celular** com **PDFs** digitais
-- Inclua cupons com itens **por kg** (frutas, carnes) e **por unidade**
-- Fotografe com **boa iluminação** e **sem sombras**
-- Tire a foto **de cima para baixo** (perpendicular ao cupom)
+Isso gera **20 PDFs** de cupons fiscais na pasta `treinamento/pdfs/`.
 
-❌ **EVITE:**
-- Fotos borradas ou desfocadas
-- Cupons amassados ou rasgados
-- Fotos com muita sombra ou reflexo
-- Usar apenas cupons do mesmo mercado
-- Cupons cortados (pegue o cupom inteiro)
+> **Por que PDFs e não imagens?** PDFs contêm texto digital selecionável, o que
+> facilita enormemente a anotação no ExtractLab. O OCR funciona muito melhor com
+> texto nativo do que com imagens de texto.
 
----
+### ETAPA 2: Criar o Modelo no ExtractLab
 
-## Passo 4: Treinar o Modelo
+1. Acesse: **https://extractlab.com.br/Model/Create**
+2. Preencha:
+   - **Nome do Modelo**: `Cupom Mercado` (ou qualquer nome - anote!)
+   - **Descrição**: `Extração de cupons fiscais de supermercado`
+3. Clique em **"Criar"** ou **"Criar e Continuar"**
 
-### Upload dos documentos
+> ⚠️ O nome do modelo precisa ser EXATAMENTE igual ao configurado no `.env.local`
+> do app. Se usar outro nome, atualize `EXTRACTLAB_MODEL_NAME` no `.env.local`
+> e nas variáveis de ambiente do Vercel.
 
-1. Na tela do modelo, clique em **"Upload de Documentos"**
-2. Selecione seus cupons fiscais (5-20 arquivos)
+### ETAPA 3: Definir os Campos de Extração
+
+Na tela do modelo, defina estes campos:
+
+| # | Nome do Campo | Tipo | Descrição |
+|---|---|---|---|
+| 1 | `estabelecimento` | Texto | Nome ou razão social do mercado |
+| 2 | `cnpj` | Texto | CNPJ do estabelecimento |
+| 3 | `data_emissao` | Texto | Data e hora da emissão |
+| 4 | `total_nota` | Texto | Valor total da nota (ex: 245,90) |
+| 5 | `itens` | Texto Longo | Bloco INTEIRO com todos os produtos |
+| 6 | `forma_pagamento` | Texto | Forma de pagamento usada |
+
+> **DICA**: Use exatamente esses nomes de campo! O app (`receipt-parser.ts`)
+> procura por esses nomes para interpretar a resposta da API.
+
+### ETAPA 4: Upload e Anotação dos Documentos
+
+1. Na tela do modelo, clique em **"Upload de Documentos"** ou **"Adicionar Documentos"**
+2. **Arraste os 20 PDFs** da pasta `treinamento/pdfs/` para a área de upload
 3. Aguarde o upload completo
 
-### Anotação dos campos
+**Para CADA documento**, você precisa ANOTAR os campos:
 
-Para CADA documento enviado:
+#### Como anotar cada campo:
 
-1. **estabelecimento**: Clique e arraste para selecionar o nome do mercado no topo
-2. **data_emissao**: Selecione a data de emissão
-3. **total_nota**: Selecione o valor total (ex: "TOTAL R$ 245,90")
-4. **itens**: Selecione o **BLOCO INTEIRO** de itens - desde o primeiro produto até o último
-
-#### Exemplo de seleção do campo "itens":
-
+**`estabelecimento`** → Selecione o nome da loja no TOPO do cupom
 ```
-001 ARROZ TIPO 1 5KG        1 UN x 23,90   23,90
-002 FEIJAO CARIOCA 1KG      2 UN x 8,90    17,80
-003 LEITE INTEGRAL          6 UN x 5,49    32,94
-004 BANANA PRATA            1,250 KG x 6,99 8,74
-005 PEITO DE FRANGO         0,875 KG x 24,90 21,79
-006 PÃO FRANCÊS             0,500 KG x 19,90 9,95
-007 DETERGENTE LIMPOL       3 UN x 2,89     8,67
+Exemplo: selecione "MINIMERCADO DA PANDIA" ou "CARREFOUR COM IND LTDA"
 ```
 
-> 💡 Selecione TODO o bloco de itens, incluindo códigos, nomes, quantidades e valores. O app vai interpretar cada linha automaticamente.
+**`cnpj`** → Selecione o CNPJ completo
+```
+Exemplo: selecione "90.369.075/0001-37"
+```
 
-### Iniciar Treinamento
+**`data_emissao`** → Selecione a data/hora
+```
+Exemplo: selecione "15/03/2025 14:32:18"
+```
 
-1. Depois de anotar todos os documentos, clique em **"Treinar Modelo"**
-2. Aguarde a conclusão (pode levar alguns minutos)
-3. O status mudará para **"Treinado"** ✅
+**`total_nota`** → Selecione o valor total da compra
+```
+Exemplo: selecione "414,68" (o valor numérico total)
+```
+
+**`itens`** → **SELECIONE O BLOCO INTEIRO** desde o primeiro produto até o último
+```
+Exemplo: selecione TUDO de "001 1234567 BAN PRATA" até o último item com valor
+Inclua números, descrições, quantidades e valores
+```
+
+**`forma_pagamento`** → Selecione a forma de pagamento
+```
+Exemplo: selecione "CARTAO CREDITO" ou "Dinheiro" ou "PIX"
+```
+
+### ETAPA 5: Treinar o Modelo
+
+1. Depois de anotar TODOS os documentos (mínimo 5, ideal 10+)
+2. Clique no botão **"Treinar Modelo"** ou **"Iniciar Treinamento"**
+3. Aguarde a conclusão (geralmente alguns minutos)
+4. O status do modelo deve mudar para **"Treinado"** ✅
+
+### ETAPA 6: Validar com o Script de Teste
+
+Após o treinamento, rode o script de validação:
+
+```bash
+node treinamento/testar-extractlab.js
+```
+
+Se tudo estiver correto, você verá:
+```
+✅ Token válido e aceito pela API!
+✅ Modelo "Cupom Mercado" encontrado e FUNCIONANDO!
+  Campos extraídos:
+    estabelecimento: MINIMERCADO DA PANDIA
+      Confiança: ██████████ 98.5%
+    ...
+```
+
+### ETAPA 7: Configurar no App
+
+1. Abra: **https://appmercado-nine.vercel.app/settings**
+2. Cole seu **Token da API**: `doc_ea59...` (começa com `doc_`)
+3. **Nome do Modelo**: exatamente como criou (ex: `Cupom Mercado`)
+4. **Salvar Configurações**
+5. Vá em **Escanear** e teste com um cupom real! 🎉
 
 ---
 
-## Passo 5: Configurar no App
+## 🔧 Solução de Problemas
 
-1. Abra o app: [https://appmercado-nine.vercel.app/settings](https://appmercado-nine.vercel.app/settings)
-2. Cole seu **Token da API** (gerado em Configurações → Tokens)
-3. Digite o **Nome do Modelo** exatamente como criou (ex: `Cupom Mercado`)
-4. Clique em **Salvar Configurações**
-5. Vá em **Escanear** e teste com um cupom! 🎉
+### ❌ "Modelo não encontrado" (HTTP 404)
+
+**Causa**: O modelo não existe na sua conta ExtractLab.
+
+**Solução**:
+1. Verifique se criou o modelo em https://extractlab.com.br/Model/Index
+2. Confirme que o nome no app é EXATAMENTE igual ao do ExtractLab
+3. O nome é sensível a maiúsculas/minúsculas e espaços
+4. Após criar, o modelo PRECISA ser treinado para funcionar
+
+**Diagnóstico rápido**:
+```bash
+node treinamento/testar-extractlab.js
+```
+
+### ❌ "Token inválido" (HTTP 401)
+
+**Causa**: Token expirado, incorreto ou não fornecido.
+
+**Solução**:
+1. Acesse https://extractlab.com.br/Dashboard/Settings
+2. Gere um novo token (selecione "Nunca Expira" se disponível)
+3. O token começa com `doc_`
+4. Atualize em `.env.local` E no Vercel (Settings → Environment Variables)
+
+### ❌ "Modelo não treinado" (HTTP 422)
+
+**Causa**: O modelo foi criado mas ainda não recebeu treinamento.
+
+**Solução**:
+1. Acesse o modelo em https://extractlab.com.br/Model/Index
+2. Upload documentos de treinamento
+3. Anote os campos em cada documento
+4. Clique em "Treinar Modelo"
+
+### ❌ "Limite excedido" (HTTP 429)
+
+**Causa**: Excedeu o limite de 100 documentos/dia (plano Starter).
+
+**Solução**: Aguarde até o dia seguinte ou faça upgrade do plano.
+
+### ❌ Campos extraídos com baixa confiança
+
+**Causa**: Modelo precisa de mais exemplos de treinamento.
+
+**Solução**:
+1. Adicione mais documentos ao treinamento (10-20 ideal)
+2. Certifique-se de que a anotação está precisa
+3. Use cupons de mercados variados (diferentes formatos)
+4. Re-treine o modelo
+
+### ❌ Itens não são separados corretamente
+
+**Causa**: O campo `itens` não foi anotado corretamente ou o parser precisa de ajuste.
+
+**Solução**:
+1. Ao anotar `itens`, selecione o BLOCO INTEIRO de produtos
+2. Inclua números sequenciais, nomes abreviados, quantidades e valores
+3. O app tem um parser (`receipt-parser.ts`) que interpreta vários formatos
+4. Use a opção "Editar" no app para corrigir itens antes de salvar
 
 ---
 
-## Solução de Problemas
+## 📂 Estrutura de Arquivos
 
-### Erro "Modelo não encontrado"
-- Verifique se o nome do modelo no app é EXATAMENTE igual ao da ExtractLab
-- Confirme que o modelo foi treinado com sucesso
-- Nomes são sensíveis a maiúsculas/minúsculas
-
-### Erro "Token inválido"
-- Gere um novo token na ExtractLab
-- Use a opção "Nunca Expira" ao criar
-- Cole o token completo (começa com `doc_`)
-
-### OCR lê incorretamente
-- Treine com mais documentos variados
-- Use fotos com melhor qualidade
-- Verifique se os campos foram anotados corretamente no treinamento
-- Use a opção "Editar" no app para corrigir itens antes de salvar
-
-### Itens não são separados corretamente
-- No treinamento, certifique-se de que o campo `itens` inclui todo o bloco de produtos
-- O app tem um parser que interpreta os formatos mais comuns de cupom brasileiro
-- Você sempre pode editar os itens manualmente após o scan
+```
+treinamento/
+├── gerar-pdfs-treinamento.js   # Gerador de PDFs (USE ESTE!)
+├── testar-extractlab.js        # Script de validação da API
+├── gerar-100-cupons.js         # Gerador antigo (PNG - não recomendado)
+├── gerar-cupons.js             # Gerador antigo (PNG - não recomendado)
+├── pdfs/                       # PDFs gerados para treinamento ✅
+│   ├── cupom_001.pdf
+│   ├── cupom_002.pdf
+│   └── ... (20 arquivos)
+└── cupom_*.png                 # Imagens antigas (não usar para treinar)
+```
 
 ---
 
-## Formatos de Cupom Suportados pelo Parser
+## 🔌 Como a API Funciona
 
-O app reconhece automaticamente estes formatos de linha de cupom:
+A ExtractLab tem apenas 3 endpoints (nenhum para treinamento):
 
-| Formato | Exemplo |
+| Endpoint | Método | Descrição |
+|---|---|---|
+| `/api/batch/extract` | POST | Extrai dados de 1 documento (síncrono) |
+| `/api/batch/process` | POST | Processa até 10 documentos (assíncrono) |
+| `/api/batch/{batchId}` | GET | Consulta status de um lote |
+
+**O app usa `/api/batch/extract`** para processar um cupom de cada vez.
+
+### Exemplo de requisição (cURL):
+```bash
+curl -X POST https://api.extractlab.com.br/api/batch/extract \
+  -H "Authorization: Bearer doc_seu_token_aqui" \
+  -F "file=@cupom.pdf" \
+  -F "modelName=Cupom Mercado"
+```
+
+### Exemplo de resposta (JSON):
+```json
+{
+  "documentId": 12345,
+  "fileName": "cupom.pdf",
+  "processedAt": "2025-12-18T10:30:00Z",
+  "fields": [
+    { "name": "estabelecimento", "value": "MINIMERCADO DA PANDIA", "confidence": 0.98 },
+    { "name": "cnpj", "value": "90.369.075/0001-37", "confidence": 0.95 },
+    { "name": "data_emissao", "value": "15/03/2025 14:32:18", "confidence": 0.97 },
+    { "name": "total_nota", "value": "414,68", "confidence": 0.96 },
+    { "name": "itens", "value": "001 BAN PRATA 1,250 KG x 5,99 7,49...", "confidence": 0.92 },
+    { "name": "forma_pagamento", "value": "CARTAO CREDITO", "confidence": 0.94 }
+  ]
+}
+```
+
+**Confiança**: Valores acima de 0.85 são alta confiança. Abaixo disso, o app sugere revisão manual.
+
+---
+
+## ⚡ Comandos Rápidos (Terminal)
+
+```bash
+# Gerar PDFs de treinamento
+cd treinamento && node gerar-pdfs-treinamento.js
+
+# Testar API e modelo
+node treinamento/testar-extractlab.js
+
+# Testar com modelo diferente
+node treinamento/testar-extractlab.js --modelo "Outro Nome"
+
+# Testar com arquivo específico
+node treinamento/testar-extractlab.js --arquivo meu_cupom.pdf
+
+# Ver variáveis de ambiente
+type .env.local
+```
+
+---
+
+## 🌐 Links Úteis
+
+| Recurso | URL |
 |---|---|
-| Código + Nome + Qtd x Preço | `001 ARROZ 5KG 1 UN X 23,90 23,90` |
-| Nome + Qtd x Preço | `LEITE INTEGRAL 6 X 5,49 32,94` |
-| Nome + Preço | `BANANA PRATA KG 8,90` |
-| Qtd + Unidade + Preço (linha separada) | `1,250 KG x 6,99` |
-
----
-
-## Links Úteis
-
-- 🌐 [ExtractLab - Criar Modelo](https://extractlab.com.br/Model/Create)
-- 🔑 [ExtractLab - Tokens](https://extractlab.com.br/Dashboard/Settings)
-- 📖 [ExtractLab - Documentação API](https://extractlab.com.br/Home/Documentation)
-- 📱 [MercadoApp](https://appmercado-nine.vercel.app)
-- ⚙️ [MercadoApp - Configurações](https://appmercado-nine.vercel.app/settings)
+| ExtractLab - Criar Modelo | https://extractlab.com.br/Model/Create |
+| ExtractLab - Seus Modelos | https://extractlab.com.br/Model/Index |
+| ExtractLab - Tokens | https://extractlab.com.br/Dashboard/Settings |
+| ExtractLab - Documentação API | https://extractlab.com.br/Home/Documentation |
+| ExtractLab - Swagger/API Explorer | https://api.extractlab.com.br/swagger |
+| MercadoApp | https://appmercado-nine.vercel.app |
+| MercadoApp - Configurações | https://appmercado-nine.vercel.app/settings |
+| MercadoApp - Escanear | https://appmercado-nine.vercel.app/scan |
+| GitHub | https://github.com/VNCRIBEIRO1/appmercado |
