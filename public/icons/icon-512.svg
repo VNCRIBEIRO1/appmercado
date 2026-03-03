@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="100" fill="#10b981"/>
+  <text x="256" y="200" text-anchor="middle" font-size="160" fill="white">🛒</text>
+  <text x="256" y="350" text-anchor="middle" font-size="56" font-weight="bold" fill="white" font-family="system-ui, sans-serif">Mercado</text>
+  <text x="256" y="410" text-anchor="middle" font-size="40" font-weight="600" fill="rgba(255,255,255,0.8)" font-family="system-ui, sans-serif">App</text>
+</svg>
