@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
 
     // Use token from request, env, or fail
     const token = apiToken || process.env.EXTRACTLAB_API_TOKEN;
-    const model = modelName || process.env.EXTRACTLAB_MODEL_NAME || 'Nota Fiscal';
+    const model = modelName || process.env.EXTRACTLAB_MODEL_NAME || 'Cupom Mercado';
 
     if (!token) {
       return NextResponse.json(
@@ -42,13 +42,15 @@ export async function POST(request: NextRequest) {
       let errorMessage = 'Erro ao processar documento';
 
       if (response.status === 401) {
-        errorMessage = 'Token inválido. Verifique seu token nas Configurações.';
+        errorMessage = 'Token inválido ou expirado. Verifique seu token nas Configurações.';
       } else if (response.status === 404) {
-        errorMessage = `Modelo "${model}" não encontrado. Verifique o nome do modelo nas Configurações.`;
+        errorMessage = `Modelo "${model}" não encontrado na sua conta ExtractLab. Você precisa criar e treinar um modelo primeiro. Vá em Configurações → Guia de Setup para instruções detalhadas.`;
       } else if (response.status === 429) {
-        errorMessage = 'Limite mensal de documentos excedido na ExtractLab.';
+        errorMessage = 'Limite de documentos excedido na ExtractLab. Aguarde ou faça upgrade do plano.';
       } else if (response.status === 400) {
-        errorMessage = 'Arquivo inválido ou modelo não especificado.';
+        errorMessage = 'Arquivo inválido ou formato não suportado. Use JPG, PNG ou PDF.';
+      } else if (response.status === 422) {
+        errorMessage = `O modelo "${model}" ainda não foi treinado. Acesse a ExtractLab e faça o treinamento com pelo menos 5 documentos de exemplo.`;
       }
 
       console.error('ExtractLab API error:', response.status, errorText);
