@@ -32,7 +32,7 @@ export default function ReceiptScanner({ onItemsExtracted }: ReceiptScannerProps
 
       // Get settings from localStorage
       const apiToken = localStorage.getItem('extractlab_token') || '';
-      const modelName = localStorage.getItem('extractlab_model') || 'Cupom Mercado';
+      const modelName = localStorage.getItem('extractlab_model') || 'mercado';
 
       if (!apiToken) {
         setErrorType('auth');

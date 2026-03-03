@@ -25,7 +25,7 @@ const API_URL = 'https://api.extractlab.com.br';
 
 // Ler configurações
 const TOKEN = process.env.EXTRACTLAB_API_TOKEN;
-const MODEL_NAME = getArg('--modelo') || process.env.EXTRACTLAB_MODEL_NAME || 'Cupom Mercado';
+const MODEL_NAME = getArg('--modelo') || process.env.EXTRACTLAB_MODEL_NAME || 'mercado';
 const TEST_FILE = getArg('--arquivo');
 
 function getArg(flag) {
@@ -64,7 +64,7 @@ async function main() {
     logERR('Arquivo .env.local não encontrado!');
     logINFO('Crie o arquivo .env.local na raiz do projeto com:');
     log('    EXTRACTLAB_API_TOKEN=doc_seu_token_aqui');
-    log('    EXTRACTLAB_MODEL_NAME=Cupom Mercado');
+    log('    EXTRACTLAB_MODEL_NAME=mercado');
     process.exit(1);
   }
   logOK('.env.local encontrado');

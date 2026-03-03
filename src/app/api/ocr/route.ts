@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
 
     // Use token from request, env, or fail
     const token = apiToken || process.env.EXTRACTLAB_API_TOKEN;
-    const model = modelName || process.env.EXTRACTLAB_MODEL_NAME || 'Cupom Mercado';
+    const model = modelName || process.env.EXTRACTLAB_MODEL_NAME || 'mercado';
 
     if (!token) {
       return NextResponse.json(

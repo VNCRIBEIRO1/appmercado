@@ -10,27 +10,30 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ducanh2912/next-pwa": "^10.2.9",
+    "browser-image-compression": "^2.0.2",
+    "date-fns": "^4.1.0",
+    "date-fns-tz": "^3.2.0",
+    "dexie": "^4.0.10",
+    "dexie-react-hooks": "^1.1.7",
+    "lucide-react": "^0.468.0",
     "next": "^14.2.18",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "dexie": "^4.0.10",
-    "dexie-react-hooks": "^1.1.7",
-    "recharts": "^2.15.0",
-    "lucide-react": "^0.468.0",
-    "date-fns": "^4.1.0",
-    "date-fns-tz": "^3.2.0",
-    "browser-image-compression": "^2.0.2",
-    "@ducanh2912/next-pwa": "^10.2.9"
+    "recharts": "^2.15.0"
   },
   "devDependencies": {
-    "typescript": "^5.6.3",
     "@types/node": "^20.17.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
-    "tailwindcss": "^3.4.15",
-    "postcss": "^8.4.49",
     "autoprefixer": "^10.4.20",
+    "dotenv": "^17.3.1",
     "eslint": "^8.57.1",
-    "eslint-config-next": "^14.2.18"
+    "eslint-config-next": "^14.2.18",
+    "pdfkit": "^0.17.2",
+    "postcss": "^8.4.49",
+    "puppeteer": "^24.37.5",
+    "tailwindcss": "^3.4.15",
+    "typescript": "^5.6.3"
   }
 }

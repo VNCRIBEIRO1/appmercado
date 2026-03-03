@@ -12,7 +12,7 @@ import { exportAllData, importData, db } from '@/lib/db';
 export default function SettingsPage() {
   const router = useRouter();
   const [apiToken, setApiToken] = useState('');
-  const [modelName, setModelName] = useState('Cupom Mercado');
+  const [modelName, setModelName] = useState('mercado');
   const [saved, setSaved] = useState(false);
   const [importError, setImportError] = useState('');
   const [showClearConfirm, setShowClearConfirm] = useState(false);
@@ -24,7 +24,7 @@ export default function SettingsPage() {
   useEffect(() => {
     // Load settings from localStorage
     const token = localStorage.getItem('extractlab_token') || '';
-    const model = localStorage.getItem('extractlab_model') || 'Cupom Mercado';
+    const model = localStorage.getItem('extractlab_model') || 'mercado';
     setApiToken(token);
     setModelName(model);
 
@@ -162,7 +162,7 @@ export default function SettingsPage() {
                   <span className="bg-brand-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0">3</span>
                   <div>
                     <p className="font-semibold">Criar Modelo de IA</p>
-                    <p className="text-gray-500">No painel, vá em &quot;Criar Modelo&quot;. Use o nome <strong>&quot;Cupom Mercado&quot;</strong> (ou outro de sua escolha - anote o nome exato!).</p>
+                    <p className="text-gray-500">No painel, vá em &quot;Criar Modelo&quot;. Use o nome <strong>&quot;mercado&quot;</strong> (ou outro de sua escolha - anote o nome exato!).</p>
                   </div>
                 </div>
 
@@ -286,7 +286,7 @@ export default function SettingsPage() {
               type="text"
               value={modelName}
               onChange={(e) => setModelName(e.target.value)}
-              placeholder="Cupom Mercado"
+              placeholder="mercado"
               className="w-full mt-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
             />
             <p className="text-[10px] text-gray-400 mt-1">
